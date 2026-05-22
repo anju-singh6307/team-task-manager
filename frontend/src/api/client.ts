@@ -1,6 +1,14 @@
 import axios from 'axios';
 import type { AxiosError } from 'axios';
 
+/**
+ * In production (Vercel): VITE_API_URL=https://your-app.up.railway.app
+ * In development:         VITE_API_URL is unset → Vite proxy forwards /api to localhost:5000
+ */
+export const API_BASE = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : '/api';
+
 // Access token lives only in memory — never written to localStorage
 let _accessToken: string | null = null;
 
@@ -9,7 +17,7 @@ export function setAccessToken(token: string | null) {
 }
 
 export const api = axios.create({
-  baseURL: '/api', // Vite proxy forwards to localhost:5000 in dev
+  baseURL: API_BASE,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -62,7 +70,7 @@ api.interceptors.response.use(
       if (!refreshToken) throw new Error('No refresh token');
 
       // Use bare axios (no interceptor) to avoid circular refresh loops
-      const { data } = await axios.post('/api/auth/refresh', { refreshToken });
+      const { data } = await axios.post(`${API_BASE}/auth/refresh`, { refreshToken });
       const { accessToken: newAccess, refreshToken: newRefresh } = data.data;
 
       setAccessToken(newAccess);

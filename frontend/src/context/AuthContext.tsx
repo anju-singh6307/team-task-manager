@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 import axios from 'axios';
-import { api, setAccessToken } from '../api/client';
+import { api, setAccessToken, API_BASE } from '../api/client';
 import type { User } from '../types';
 
 interface AuthContextType {
@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     try {
       // Use bare axios to avoid the interceptor triggering another refresh
-      const { data: refreshData } = await axios.post('/api/auth/refresh', {
+      const { data: refreshData } = await axios.post(`${API_BASE}/auth/refresh`, {
         refreshToken: stored,
       });
       setAccessToken(refreshData.data.accessToken);
